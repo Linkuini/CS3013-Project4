@@ -1,10 +1,20 @@
 /* UserAPI.c - defines user functions for accessing memory */
 
+#include "hierarchy.h"
+#include "UserAPI.h"
+#include <stdlib.h>
 
 /* Reserves a new memory location of size int in RAM. Return -1 if no memory available */
 vAddr allocateNewInt()
 {
 
+	int i;
+	for(i = 0; i < 25; i++)
+	{
+		if(RAMArray[i] != NULL)
+			return i;
+	}
+	return -1; //no available locations in RAM
 
 }
 
