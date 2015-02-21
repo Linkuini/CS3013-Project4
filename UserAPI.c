@@ -11,7 +11,7 @@ vAddr allocateNewInt()
 	int i;
 	for(i = 0; i < 25; i++)
 	{
-		if(RAMArray[i] != NULL)
+		if(NULL == RAMArray[i])
 			return i;
 	}
 	return -1; //no available locations in RAM
