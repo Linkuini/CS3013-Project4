@@ -15,6 +15,12 @@ int main(int argc, char* argv[]){
 	vAddr address2;
 
 	int i;
+	//Initialize the RAMArray elements to NULL
+	for(i = 0; i < 25; i++)
+	{
+		RAMArray[i] = -1;
+	}
+
 	for(i = 0; i < 24; i++)
 	{
 		RAMArray[i] = i;
@@ -31,8 +37,8 @@ int main(int argc, char* argv[]){
 
 	printf("address2 is: %d\n", address2);
 
-	for(i = 0; i < 25; i++)
-	{
-		printf("RAMArray[%d] = %d\n", i, RAMArray[i]);
-	}
+//	for(i = 0; i < 25; i++)
+//	{
+//		printf("RAMArray[%d] = %d\n", i, RAMArray[i]);
+//	}
 }
