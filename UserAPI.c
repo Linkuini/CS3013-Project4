@@ -21,7 +21,7 @@ vAddr allocateNewInt()
 /* Obtains the indicated memory page from lower levels of heirarchy if needed. Returns an int pointer
  * to the location in RAM. The page is locked in memory and is immediately considered "dirty". Return
  * NULL iff the pointer cannot be prvided (ex: page must be brought to RAM but all of RAM is locked) */
-int *accessIntPtr(vAddr addresss)
+int *accessIntPtr(vAddr address)
 {
 
 
