@@ -5,10 +5,10 @@
 //Enum to represent where the page is currently located
 typedef enum
 {
-	RAM,
+	NONE,
 	SSD,
 	HD,
-	NONE
+	RAM
 } MemoryLocation;
 
 typedef struct pageStruct{
@@ -22,6 +22,8 @@ typedef struct pageStruct{
 
 pageStruct pageTable[1000];
 
-void initPageStruct(pageStruct page);
+void initPageStruct(pageStruct *page);
 
 void initPageTable(pageStruct table[]);
+
+void printPageData(pageStruct page);
