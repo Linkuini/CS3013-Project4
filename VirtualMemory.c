@@ -12,16 +12,9 @@
 
 int main(int argc, char* argv[]){
 
-	vAddr address1;
-	vAddr address2;
+	initHierarchy();
 
 	int i;
-	//Initialize the RAMArray elements to NULL
-	for(i = 0; i < 25; i++)
-	{
-		RAMArray[i] = -1;
-	}
-
 	for(i = 0; i < 24; i++)
 	{
 		RAMArray[i] = i;
@@ -29,9 +22,4 @@ int main(int argc, char* argv[]){
 
 	initPageTable(pageTable);
 
-	printPageData(pageTable[0]);
-
-	pageTable[0].location = HD;
-
-	printPageData(pageTable[0]);
 }

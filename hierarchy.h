@@ -5,6 +5,8 @@ int RAMArray[25];
 int SSDArray[100];
 int HDArray[1000];
 
-typedef signed short vAddr; 
+typedef signed short vAddr;
+
+void initHierarchy();
 
 #endif

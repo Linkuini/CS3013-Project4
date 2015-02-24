@@ -23,23 +23,23 @@ void initPageTable(pageStruct table[])
 
 void printPageData(pageStruct page)
 {
-	printf("isLocked: %d\n isAllocated: %d\n isDirty: %d\n", page.isLocked, page.isAllocated, page.isDirty);
+	printf("   isLocked: %d\n   isAllocated: %d\n   isDirty: %d\n", page.isLocked, page.isAllocated, page.isDirty);
 	switch(page.location){
 		case NONE:
-			printf("location: NONE\n");
+			printf("   location: NONE\n");
 			break;
 		case SSD:
-			printf("location: SSD\n");
+			printf("   location: SSD\n");
 			break;
 		case RAM:
-			printf("location: RAM\n");
+			printf("   location: RAM\n");
 			break;
 		case HD:
-			printf("location: HD\n");
+			printf("   location: HD\n");
 			break;
 		default:
-			printf("location: UNKNOWN");
+			printf("   location: UNKNOWN");
 			break;
 	}
-	printf("memoryIndex: %d\n lastAccessed: %ld\n", page.memoryIndex, page.lastAccessed);
+	printf("   memoryIndex: %d\n   lastAccessed: %ld\n", page.memoryIndex, page.lastAccessed);
 }

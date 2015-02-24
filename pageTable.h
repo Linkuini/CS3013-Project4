@@ -1,5 +1,8 @@
 /* handles the definition of a page struct and holds the page table itself */
 
+#ifndef _HIERARCHY_H
+#define _HIERARCHY_H
+
 #include "hierarchy.h"
 
 //Enum to represent where the page is currently located
@@ -27,3 +30,5 @@ void initPageStruct(pageStruct *page);
 void initPageTable(pageStruct table[]);
 
 void printPageData(pageStruct page);
+
+#endif
