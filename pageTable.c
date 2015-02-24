@@ -7,17 +7,19 @@ void initPageStruct(pageStruct *page)
 	page->isAllocated = 0; //unallocated
 	page->isDirty = 0;//clean
 	page->location = NONE;
-	page->memoryIndex = -1;// no location in memory
+	page->RAMIndex = -1;// not currently located in RAM
+	page->SSDIndex = -1;// not currently located in SSD
+	page->HDIndex = -1; // not currently located in HD
 	page->lastAccessed = -1; //not yet accessed
 }
 
-void initPageTable(pageStruct table[])
+void initPageTable()
 {
 	int i;
 	for(i = 0; i < 1000; i++)
 	{
 //		printf("Initializing page #%d\n", i);
-		initPageStruct(&table[i]);
+		initPageStruct(&pageTable[i]);
 	}
 }
 
@@ -26,20 +28,20 @@ void printPageData(pageStruct page)
 	printf("   isLocked: %d\n   isAllocated: %d\n   isDirty: %d\n", page.isLocked, page.isAllocated, page.isDirty);
 	switch(page.location){
 		case NONE:
-			printf("   location: NONE\n");
+			printf("   memory level: NONE\n");
 			break;
 		case SSD:
-			printf("   location: SSD\n");
+			printf("   memory level: SSD\n");
 			break;
 		case RAM:
-			printf("   location: RAM\n");
+			printf("   memory level: RAM\n");
 			break;
 		case HD:
-			printf("   location: HD\n");
+			printf("   memory level: HD\n");
 			break;
 		default:
-			printf("   location: UNKNOWN");
+			printf("   memory level: UNKNOWN");
 			break;
 	}
-	printf("   memoryIndex: %d\n   lastAccessed: %ld\n", page.memoryIndex, page.lastAccessed);
+	printf("   RAMIndex: %d\n   SSDIndex: %d\n   HDIndex: %d\n   lastAccessed: %ld\n", page.RAMIndex, page.SSDIndex, page.HDIndex, page.lastAccessed);
 }

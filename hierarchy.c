@@ -1,4 +1,4 @@
-#include hierarchy.h
+#include "hierarchy.h"
 
 
 //initializes the memory arrays

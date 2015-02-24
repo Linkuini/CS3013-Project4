@@ -1,7 +1,7 @@
 /* handles the definition of a page struct and holds the page table itself */
 
-#ifndef _HIERARCHY_H
-#define _HIERARCHY_H
+#ifndef _PAGE_TABLE_H
+#define _PAGE_TABLE_H
 
 #include "hierarchy.h"
 
@@ -18,8 +18,10 @@ typedef struct pageStruct{
 	int isLocked; //0 if unlocked, 1 if locked
 	int isAllocated; //0 if unallocated, 1 if allocated
 	int isDirty; //0 if clean, 1 if dirty
-	MemoryLocation location; //where the page is currently stored
-	vAddr memoryIndex; //-1 if unallocated?
+	MemoryLocation location; //highest level where the page is currently stored
+	int RAMIndex; //-1 if not in RAM
+	int SSDIndex; //-1 if not in SSD
+	int HDIndex;  //-1 if not in HD
 	long lastAccessed; //time of last access
 } pageStruct;
 
@@ -30,7 +32,7 @@ pageStruct pageTable[1000];
 
 void initPageStruct(pageStruct *page);
 
-void initPageTable(pageStruct table[]);
+void initPageTable();
 
 void printPageData(pageStruct page);
 

@@ -14,12 +14,6 @@ int main(int argc, char* argv[]){
 
 	initHierarchy();
 
-	int i;
-	for(i = 0; i < 24; i++)
-	{
-		RAMArray[i] = i;
-	}
-
-	initPageTable(pageTable);
+	initPageTable();
 
 }
