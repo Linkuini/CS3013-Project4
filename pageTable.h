@@ -3,13 +3,13 @@
 #include "hierarchy.h"
 
 //Enum to represent where the page is currently located
-enum MemoryLocation
+typedef enum
 {
 	RAM,
 	SSD,
 	HD,
 	NONE
-};
+} MemoryLocation;
 
 typedef struct pageStruct{
 	int isLocked; //0 if unlocked, 1 if locked
@@ -22,7 +22,6 @@ typedef struct pageStruct{
 
 pageStruct pageTable[1000];
 
-void initPageStruct(pageStruct *page);
+void initPageStruct(pageStruct page);
 
-void initPageTable(pageStruct *table);
-
+void initPageTable(pageStruct table[]);
