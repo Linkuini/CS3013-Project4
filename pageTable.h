@@ -23,6 +23,9 @@ typedef struct pageStruct{
 	long lastAccessed; //time of last access
 } pageStruct;
 
+ // pageTable - table which will hold all the pageStruct pages for reference.
+ // The first 25 pages in the table will represent the RAM. The next 100 will represent
+ // the SSD, and the rest will represent the HD. Pages will be moved around as needed.
 pageStruct pageTable[1000];
 
 void initPageStruct(pageStruct *page);
