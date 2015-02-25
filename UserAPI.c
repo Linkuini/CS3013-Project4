@@ -4,7 +4,15 @@
 #include "UserAPI.h"
 #include "pageTable.h"
 #include <stdio.h>//for printf
-#include <stdlib.h> 
+#include <stdlib.h>
+
+/* evicts a page from either the SSD or RAM, given by the input location. This function returns the index of the given
+ * array which has been changed. Ex: if a page must be evicted from RAMArray, location is RAM, and the return is a RAMIndex. */
+int evictPageFrom(MemoryLocation location)
+{
+		return 1;
+
+}
 
 /* Reserves a new memory location of size int in RAM. Return -1 if no memory available */
 vAddr allocateNewInt()
@@ -32,13 +40,13 @@ vAddr allocateNewInt()
 		}
 		else
 			notAllAllocated = 1;	// page table is not full
-		
+
 		if (pagesInRAM > 25 )		// if RAM or SSD are more than full, crash.
 		{
 			errorWithContext("Your RAM is not that big...");
 			exit(1);
 		}
-		if (pagesInSSD > 100 )		
+		if (pagesInSSD > 100)
 		{
 			errorWithContext("Your SSD a splode!");
 			exit(1);
@@ -54,12 +62,41 @@ vAddr allocateNewInt()
 	//if we have reached this point, we need to evict a page currently in RAMArray
 	if (pagesInRAM == 25)
 	{
-		// evict a page from RAM to make room
+		int indexInRAM;
+
+		//if the RAM and SSD are both full, evict a page from the SSD and then evict from the RAM
+		if(pagesInSSD == 100)
+		{
+			evictPageFrom(SSD);
+
+
+		}
+		// evict a page from RAM to make room, return the newly opened index in RAM
+		indexInRAM = evictPageFrom(RAM);
+
+		vAddr i;
+		for(i = 0; i < 1000; i++)
+		{
+			if(!pageTable[i].isAllocated)
+			{
+				pageTable[i].isAllocated = 1;
+				pageTable[i].RAMIndex = indexInRAM;
+				pageTable[i].location = RAM;
+				
+
+				return i;
+
+			}
+		}
+		errorWithContext("You shouldn't be here but there are not any free pages in the page table");
 
 		// for now, just print to console and return error
 		printf("No room in RAM!");
-		return -1;
+			return -1;
+		
 	}
+
+	//move this into the evictPageFrom() function
 	//method #1: least recently accessed
 	   //Scan the page table for pages located in RAM that are unlocked, and check the page's
 	   //lastAccessed variable to find the oldest page. Move that page to the SSD, and place the new
@@ -94,15 +131,25 @@ int *accessIntPtr(vAddr address)
  * pointers invalid and must not be used */
 void unlockMemory(vAddr address)
 {
-	//scan the page table for the corresponding page related to the given address
-
 	//change the isLocked variable to unlocked (0)
-
+	pageTable[address].isLocked = 0;
 
 }
 
 /* Frees the memory and deletes any swapped out copies of the page */
 void freeMemory(vAddr address)
 {
+	//create a pointer to the page to be changed
+	pageStruct *page = &pageTable[address];
 
+	//make sure the page's data is removed from the RAM, SSD, and HD
+	if(page->RAMIndex!=-1)
+		RAMArray[page->RAMIndex] = -1;
+	if(page->SSDIndex!=-1)
+		SSDArray[page->SSDIndex] = -1;
+	if(page->HDIndex!=-1)
+		HDArray[page->HDIndex] = -1;
+
+	//reset the page to init
+	initPageStruct(page);
 }

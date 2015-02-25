@@ -2,6 +2,7 @@
 #define _USER_API_H
 
 #include "hierarchy.h"
+#include "pageTable.h"
 
 vAddr allocateNewInt();
 
@@ -11,5 +12,6 @@ void unlockMemory(vAddr address);
 
 void freeMemory(vAddr address);
 
+int evictPageFrom(MemoryLocation location);
 
 #endif
