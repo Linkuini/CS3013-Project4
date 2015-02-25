@@ -2,22 +2,64 @@
 
 #include "hierarchy.h"
 #include "UserAPI.h"
-#include <stdlib.h>//for printf
+#include "pageTable.h"
+#include <stdio.h>//for printf
+#include <stdlib.h> 
 
 /* Reserves a new memory location of size int in RAM. Return -1 if no memory available */
 vAddr allocateNewInt()
 {
 	//simple algorithm which determines whether or not there is an empty space in the RAM
+
+	// Find out how many pages exist in RAM or SSD
+	int pagesInRAM = 0;
+	int pagesInSSD = 0;
+
+	// If this flag is still 0 when we get to the end of the page table,
+	// the table's full!
+	int notAllAllocated = 0;
+
 	int i;
-	for(i = 0; i < 25; i++)
+	for(i = 0; i < 1000; i++)
 	{
-		if(RAMArray[i] == -1)
+		if(pageTable[i].isAllocated){
 			//instead of returning the index of the array, instead use that index to find
 			//the corresponding vAddr in the page table
-			return i;
+			if (pageTable[i].RAMIndex != -1)
+				pagesInRAM++;
+			if (pageTable[i].SSDIndex != -1)
+				pagesInSSD++;
+		}
+		else
+			notAllAllocated = 1;	// page table is not full
+		
+		if (pagesInRAM > 25 )		// if RAM or SSD are more than full, crash.
+		{
+			errorWithContext("Your RAM is not that big...");
+			exit(1);
+		}
+		if (pagesInSSD > 100 )		
+		{
+			errorWithContext("Your SSD a splode!");
+			exit(1);
+		}
+	}
+
+	// refuse to allocate more than 1000 pages
+	if (notAllAllocated == 0)
+	{
+		printf("Page table's full.\n");
+		return -1;
 	}
 	//if we have reached this point, we need to evict a page currently in RAMArray
+	if (pagesInRAM == 25)
+	{
+		// evict a page from RAM to make room
 
+		// for now, just print to console and return error
+		printf("No room in RAM!");
+		return -1;
+	}
 	//method #1: least recently accessed
 	   //Scan the page table for pages located in RAM that are unlocked, and check the page's
 	   //lastAccessed variable to find the oldest page. Move that page to the SSD, and place the new
@@ -30,12 +72,12 @@ vAddr allocateNewInt()
 
 	   //return the vAddr of the newly opened page
 
-	//is this necessary any more?
+	//is this necessary anymore?
 	return -1; //no available locations in RAM
 
 }
 
-/* Obtains the indicated memory page from lower levels of heirarchy if needed. Returns an int pointer
+/* Obtains the indicated memory page from lower levels of hierarchy if needed. Returns an int pointer
  * to the location in RAM. The page is locked in memory and is immediately considered "dirty". Return
  * NULL if the pointer cannot be provided (ex: page must be brought to RAM but all of RAM is locked) */
 int *accessIntPtr(vAddr address)
