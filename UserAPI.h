@@ -6,6 +6,7 @@
 
 int isArrayFull(MemoryLocation loc);
 int isArrayLocked(MemoryLocation loc);
+int findEmptyFrame(MemoryLocation loc);
 
 vAddr allocateNewInt();
 

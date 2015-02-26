@@ -72,6 +72,44 @@ int isArrayLocked(MemoryLocation loc)
 	}
 }
 
+// takes an array of physical memory and returns the index of the first empty page in that frame
+int findEmptyFrame(MemoryLocation loc)
+{
+	int memcap;		// number of frames in this layer of physical memory
+	int i;
+	
+	switch (loc) {
+  case RAM:
+			memcap = 25;
+			for (i = 0; i < memcap; i++) {
+    if (RAMArray[i] == -1)
+		return i;
+			}
+			break;
+  case SSD:
+			memcap = 100;
+			for (i = 0; i < memcap; i++) {
+    if (SSDArray[i] == -1)
+		return i;
+			}
+			break;
+  case HD:
+				memcap = 1000;
+				for (i = 0; i < memcap; i++) {
+					if (HDArray[i] == -1)
+						return i;
+				}
+			break;
+			
+  default:
+			errorWithContext("Invalid input: Not a MemoryLocation!");
+			break;
+	}
+	
+	// return -1 if we don't find an empty frame
+	return -1;
+}
+
 /* evicts a page from either the SSD or RAM, given by the input location. This function returns the index of the given
  * array which has been changed. Ex: if a page must be evicted from RAMArray, location is RAM, and the return is a RAMIndex. */
 int evictPageFrom(MemoryLocation location)
@@ -104,7 +142,9 @@ int evictPageFrom(MemoryLocation location)
 		pt_entry = pageTableIndex(evictIndex, location);
 	}
 	
-	// assign value of evicted page to empty space in a slower memory layer
+	// find an empty space in slower memory
+	
+	// assign value of evicted page to empty space
 	
 	
 	// remove value from location in memory
