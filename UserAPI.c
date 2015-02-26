@@ -30,9 +30,10 @@ int isArrayFull(MemoryLocation loc)
 					full = 0;
 			}
 			break;
-			
+
 	default:
 			errorWithContext("Invalid input: Not a MemoryLocation!");
+			exit(1);
 			break;
 	}
 	return full;
@@ -44,7 +45,7 @@ int isArrayLocked(MemoryLocation loc)
 	int RAMLocked = 1;		// is 1 if all pages in RAM are locked
 	int SSDLocked = 1;		// same for SSD
 	int HDLocked = 1;		// same for HD
-	
+
 	int i;
 	for (i = 0; i<1000; i++) {
 		if (!pageTable[i].isLocked) {
@@ -68,6 +69,7 @@ int isArrayLocked(MemoryLocation loc)
 			break;
   default:
 			errorWithContext("Invalid input: Not a MemoryLocation!");
+			exit(1);
 			break;
 	}
 }
@@ -81,25 +83,29 @@ int evictPageFrom(MemoryLocation location)
 		printf("Sorry, all pages locked.\n");
 		return -1;
 	}
-	
+
 	int memcap;			// number of pages that this memory layer can hold
 	int evictIndex;		// index of the page to be evicted
-	
+
 	if (location == RAM)
 		memcap = 25;
 	else if (location == SSD)
 		memcap = 100;
-	
+
 	// evict a page at random
 	evictIndex = rand() % memcap;
-	
+
+	//fetch the page which is to be evicted
+	pageStruct thisPage;
+
+	thisPage = pageTable[pageTableIndex(location, evictIndex)];
+
 	// assign value of evicted page to empty space in a slower memory layer
-	
-	
+
 	// remove value from location in memory
-	
+
 	// update page table data
-	
+
 	return evictIndex;
 
 }
