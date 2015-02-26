@@ -143,6 +143,16 @@ int evictPageFrom(MemoryLocation location)
 	}
 	
 	// find an empty space in slower memory
+	int destination;		// address of unallocated page frame
+	
+	if (location == RAM) {
+		if (isArrayFull(SSD))			// if SSD is full, perform a cascading eviction
+			destination = evictPageFrom(SSD);
+		else							// otherwise just find an empty spot
+			destination = findEmptyFrame(SSD);
+	}
+	else if (location == SSD)
+		destination = findEmptyFrame(HD);
 	
 	// assign value of evicted page to empty space
 	
