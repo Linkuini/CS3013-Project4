@@ -6,11 +6,95 @@
 #include <stdio.h>//for printf
 #include <stdlib.h>
 
+// see if an array in memory is full
+int isArrayFull(MemoryLocation loc)
+{
+	int i;
+	int full = 1;
+	switch (loc) {
+		case RAM:
+			for (i=0; i<25; i++) {
+				if (RAMArray[i] == -1)
+					full = 0;
+			}
+			break;
+		case SSD:
+			for (i=0; i<100; i++) {
+				if (SSDArray[i] == -1)
+					full = 0;
+			}
+			break;
+		case HD:
+			for (i=0; i<1000; i++) {
+				if (HDArray[i] == -1)
+					full = 0;
+			}
+			break;
+			
+	default:
+			errorWithContext("Invalid input: Not a MemoryLocation!");
+			break;
+	}
+	return full;
+}
+
+// see if entire array is locked
+int isArrayLocked(MemoryLocation loc)
+{
+	int RAMLocked = 1;		// is 1 if all pages in RAM are locked
+	int SSDLocked = 1;		// same for SSD
+	int HDLocked = 1;		// same for HD
+	
+	int i;
+	for (i = 0; i<1000; i++) {
+		if (!pageTable[i].isLocked) {
+			if (pageTable[i].RAMIndex != -1)
+				RAMLocked = 0;
+			if (pageTable[i].SSDIndex != -1)
+				SSDLocked = 0;
+			if (pageTable[i].HDIndex != -1)
+				HDLocked = 0;
+		}
+	}
+	switch (loc) {
+		case RAM:
+			return RAMLocked;
+			break;
+		case SSD:
+			return SSDLocked;
+			break;
+		case HD:
+			return HDLocked;
+			break;
+  default:
+			errorWithContext("Invalid input: Not a MemoryLocation!");
+			break;
+	}
+}
+
 /* evicts a page from either the SSD or RAM, given by the input location. This function returns the index of the given
  * array which has been changed. Ex: if a page must be evicted from RAMArray, location is RAM, and the return is a RAMIndex. */
 int evictPageFrom(MemoryLocation location)
 {
-		return 1;
+	int memcap;			// number of pages that this memory layer can hold
+	int evictIndex;		// index of the page to be evicted
+	
+	if (location == RAM)
+		memcap = 25;
+	else if (location == SSD)
+		memcap = 100;
+	
+	// evict a page at random
+	evictIndex = rand() % memcap;
+	
+	// assign value of evicted page to empty space in a slower memory layer
+	
+	
+	// remove value from location in memory
+	
+	// update page table data
+	
+	return evictIndex;
 
 }
 

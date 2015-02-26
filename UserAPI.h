@@ -4,6 +4,9 @@
 #include "hierarchy.h"
 #include "pageTable.h"
 
+int isArrayFull(MemoryLocation loc);
+int isArrayLocked(MemoryLocation loc);
+
 vAddr allocateNewInt();
 
 int *accessIntPtr(vAddr address);
