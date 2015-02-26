@@ -45,3 +45,18 @@ void printPageData(pageStruct page)
 	}
 	printf("   RAMIndex: %d\n   SSDIndex: %d\n   HDIndex: %d\n   lastAccessed: %ld\n", page.RAMIndex, page.SSDIndex, page.HDIndex, page.lastAccessed);
 }
+
+//	pass in a page's location in physical memory and return its address in the page table
+vAddr pageTableIndex(int arrayIndex, MemoryLocation loc)
+{
+	vAddr i;
+	for (i = 0; i < 1000; i++) {
+		if (loc == RAM && pageTable[i].RAMIndex == arrayIndex)
+			return i;
+		if (loc == SSD && pageTable[i].SSDIndex == arrayIndex)
+			return i;
+		if (loc == HD && pageTable[i].HDIndex == arrayIndex)
+			return i;
+	}
+}
+

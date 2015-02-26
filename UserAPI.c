@@ -76,6 +76,12 @@ int isArrayLocked(MemoryLocation loc)
  * array which has been changed. Ex: if a page must be evicted from RAMArray, location is RAM, and the return is a RAMIndex. */
 int evictPageFrom(MemoryLocation location)
 {
+	// return error if all pages in array we are evicting from are locked
+	if (isArrayLocked(location)) {
+		printf("Sorry, all pages locked.\n");
+		return -1;
+	}
+	
 	int memcap;			// number of pages that this memory layer can hold
 	int evictIndex;		// index of the page to be evicted
 	

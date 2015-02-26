@@ -36,4 +36,6 @@ void initPageTable();
 
 void printPageData(pageStruct page);
 
+vAddr pageTableIndex(int arrayIndex, MemoryLocation loc);
+
 #endif
