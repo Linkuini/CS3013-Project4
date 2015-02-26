@@ -93,6 +93,17 @@ int evictPageFrom(MemoryLocation location)
 	// evict a page at random
 	evictIndex = rand() % memcap;
 	
+	// make sure the page we find isn't locked
+	vAddr pt_entry;		// the page table address of the page to be evicted
+	
+	pt_entry = pageTableIndex(evictIndex, location);
+	
+	// if the page is locked, rummage through pages until we find one that isn't
+	while (pageTable[pt_entry].isLocked) {
+		evictIndex = rand() % memcap;
+		pt_entry = pageTableIndex(evictIndex, location);
+	}
+	
 	// assign value of evicted page to empty space in a slower memory layer
 	
 	
