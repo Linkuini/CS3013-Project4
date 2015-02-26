@@ -53,6 +53,8 @@ vAddr allocateNewInt()
 		}
 	}
 
+	printf("pagesInRAM: %d\n pagesInSSD: %d\n", pagesInRAM, pagesInSSD);
+
 	// refuse to allocate more than 1000 pages
 	if (notAllAllocated == 0)
 	{
@@ -73,6 +75,7 @@ vAddr allocateNewInt()
 		}
 		// evict a page from RAM to make room, return the newly opened index in RAM
 		indexInRAM = evictPageFrom(RAM);
+		printf("Evicted a page from RAM at index %d", indexInRAM);
 
 		vAddr i;
 		for(i = 0; i < 1000; i++)
@@ -82,8 +85,9 @@ vAddr allocateNewInt()
 				pageTable[i].isAllocated = 1;
 				pageTable[i].RAMIndex = indexInRAM;
 				pageTable[i].location = RAM;
-				
 
+				RAMArray[indexInRAM] = 0;
+				printf("Are you at the success point? \nvAddr is: %d\n", i);
 				return i;
 
 			}
@@ -93,9 +97,39 @@ vAddr allocateNewInt()
 		// for now, just print to console and return error
 		printf("No room in RAM!");
 			return -1;
-		
 	}
+	else if(pagesInRAM < 25)
+	{
+		//scan for an unallocated page in pageTable, allocate it, and return the vAddr
+		vAddr i;
+		for(i = 0; i < 1000; i++)
+		{
 
+			//printf("vAddr is: %d\n", i);
+			if(!pageTable[i].isAllocated)
+			{
+				int j;
+				for(j = 0; j < 25; j++)
+				{
+					if(RAMArray[j] != -1 && RAMArray[j] != 0)
+						break;
+				}
+
+				pageTable[i].isAllocated = 1;
+				pageTable[i].RAMIndex = j;
+				RAMArray[j] = 0;
+				pageTable[i].location = RAM;
+
+				printf("Successfully reached end\nReturn is: %d\n\n", i);
+
+				return i;
+
+			}
+
+		}
+
+
+	}
 	//move this into the evictPageFrom() function
 	//method #1: least recently accessed
 	   //Scan the page table for pages located in RAM that are unlocked, and check the page's
@@ -110,6 +144,7 @@ vAddr allocateNewInt()
 	   //return the vAddr of the newly opened page
 
 	//is this necessary anymore?
+	errorWithContext("You got to the end");
 	return -1; //no available locations in RAM
 
 }
@@ -119,7 +154,46 @@ vAddr allocateNewInt()
  * NULL if the pointer cannot be provided (ex: page must be brought to RAM but all of RAM is locked) */
 int *accessIntPtr(vAddr address)
 {
-	//scan through the page table for the corresponding vAddr
+	pageStruct structOfInterest = pageTable[address];
+	//if the page is already in RAM, return a pointer to the necessary memory in RAM
+	if(structOfInterest.location == RAM)
+	{
+		structOfInterest.isDirty = 1;
+		structOfInterest.isLocked = 1;
+		return &RAMArray[structOfInterest.RAMIndex];
+	}
+	//if the page is not in RAM but is currently in SSD, evict a page from SSD
+	else if(structOfInterest.location == SSD)
+	{
+		int newlyOpenedIndexInRAM = evictPageFrom(SSD);
+
+		RAMArray[newlyOpenedIndexInRAM] = 0;
+
+		structOfInterest.RAMIndex = newlyOpenedIndexInRAM;
+		structOfInterest.isDirty = 1;
+		structOfInterest.isLocked = 1;
+
+		return &RAMArray[structOfInterest.RAMIndex];
+
+	}
+	//page is in HD. evict page from SSD and then from RAM
+	else if(structOfInterest.location == HD)
+	{
+		int newlyOpenedIndexInRAM;
+
+		evictPageFrom(HD);
+
+		newlyOpenedIndexInRAM = evictPageFrom(SSD);
+
+		RAMArray[newlyOpenedIndexInRAM] = 0;
+
+		structOfInterest.RAMIndex = newlyOpenedIndexInRAM;
+		structOfInterest.isDirty = 1;
+		structOfInterest.isLocked = 1;
+
+		return &RAMArray[structOfInterest.RAMIndex];
+	}
+
 
 	//use the data in the page struct to move the corresponding page into RAM if not already
 
@@ -133,6 +207,8 @@ void unlockMemory(vAddr address)
 {
 	//change the isLocked variable to unlocked (0)
 	pageTable[address].isLocked = 0;
+
+	//should we do anything here about updating the arrays to have the same value? due to dirty bit
 
 }
 

@@ -12,8 +12,14 @@
 
 int main(int argc, char* argv[]){
 
+	//initialize the memory and set up for use
 	initHierarchy();
-
 	initPageTable();
 
+
+	int i;
+	for(i = 0; i < 30; i++)
+	{
+		vAddr address1 = allocateNewInt();
+	}
 }

@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS= -std=gnu99
-DEPS = hierarchy.h pageTable.h UserAPI.h Error.h
-OBJ = hierarchy.o pageTable.o UserAPI.o Error.o VirtualMemory.o
+DEPS = Error.h hierarchy.h pageTable.h UserAPI.h
+OBJ = Error.c hierarchy.o pageTable.o UserAPI.o VirtualMemory.o
 
 all: VirtualMemory
 
