@@ -155,11 +155,25 @@ int evictPageFrom(MemoryLocation location)
 		destination = findEmptyFrame(HD);
 	
 	// assign value of evicted page to empty space
+	if (location == RAM) {
+		SSDArray[destination] = RAMArray[evictIndex];
+		// remove value from location in memory
+		RAMArray[evictIndex] = -1;
+		// update page table data
+		pageTable[pt_entry].RAMIndex = -1;
+		pageTable[pt_entry].SSDIndex = destination;
+		pageTable[pt_entry].location = SSD;
+	}
 	
-	
-	// remove value from location in memory
-	
-	// update page table data
+	if (location == SSD) {
+		HDArray[destination] = SSDArray[evictIndex];
+		// remove value from location in memory
+		SSDArray[evictIndex] = -1;
+		// update page table data
+		pageTable[pt_entry].SSDIndex = -1;
+		pageTable[pt_entry].HDIndex = destination;
+		pageTable[pt_entry].location = HD;
+	}
 	
 	return evictIndex;
 
