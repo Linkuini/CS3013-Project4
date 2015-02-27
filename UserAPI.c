@@ -74,6 +74,44 @@ int isArrayLocked(MemoryLocation loc)
 	}
 }
 
+// takes an array of physical memory and returns the index of the first empty page in that frame
+int findEmptyFrame(MemoryLocation loc)
+{
+	int memcap;		// number of frames in this layer of physical memory
+	int i;
+	
+	switch (loc) {
+  case RAM:
+			memcap = 25;
+			for (i = 0; i < memcap; i++) {
+    if (RAMArray[i] == -1)
+		return i;
+			}
+			break;
+  case SSD:
+			memcap = 100;
+			for (i = 0; i < memcap; i++) {
+    if (SSDArray[i] == -1)
+		return i;
+			}
+			break;
+  case HD:
+				memcap = 1000;
+				for (i = 0; i < memcap; i++) {
+					if (HDArray[i] == -1)
+						return i;
+				}
+			break;
+			
+  default:
+			errorWithContext("Invalid input: Not a MemoryLocation!");
+			break;
+	}
+	
+	// return -1 if we don't find an empty frame
+	return -1;
+}
+
 /* evicts a page from either the SSD or RAM, given by the input location. This function returns the index of the given
  * array which has been changed. Ex: if a page must be evicted from RAMArray, location is RAM, and the return is a RAMIndex. */
 int evictPageFrom(MemoryLocation location)
@@ -94,18 +132,51 @@ int evictPageFrom(MemoryLocation location)
 
 	// evict a page at random
 	evictIndex = rand() % memcap;
-
-	//fetch the page which is to be evicted
-	pageStruct thisPage;
-
-	thisPage = pageTable[pageTableIndex(location, evictIndex)];
-
-	// assign value of evicted page to empty space in a slower memory layer
-
-	// remove value from location in memory
-
-	// update page table data
-
+	
+	// make sure the page we find isn't locked
+	vAddr pt_entry;		// the page table address of the page to be evicted
+	
+	pt_entry = pageTableIndex(evictIndex, location);
+	
+	// if the page is locked, rummage through pages until we find one that isn't
+	while (pageTable[pt_entry].isLocked) {
+		evictIndex = rand() % memcap;
+		pt_entry = pageTableIndex(evictIndex, location);
+	}
+	
+	// find an empty space in slower memory
+	int destination;		// address of unallocated page frame
+	
+	if (location == RAM) {
+		if (isArrayFull(SSD))			// if SSD is full, perform a cascading eviction
+			destination = evictPageFrom(SSD);
+		else							// otherwise just find an empty spot
+			destination = findEmptyFrame(SSD);
+	}
+	else if (location == SSD)
+		destination = findEmptyFrame(HD);
+	
+	// assign value of evicted page to empty space
+	if (location == RAM) {
+		SSDArray[destination] = RAMArray[evictIndex];
+		// remove value from location in memory
+		RAMArray[evictIndex] = -1;
+		// update page table data
+		pageTable[pt_entry].RAMIndex = -1;
+		pageTable[pt_entry].SSDIndex = destination;
+		pageTable[pt_entry].location = SSD;
+	}
+	
+	if (location == SSD) {
+		HDArray[destination] = SSDArray[evictIndex];
+		// remove value from location in memory
+		SSDArray[evictIndex] = -1;
+		// update page table data
+		pageTable[pt_entry].SSDIndex = -1;
+		pageTable[pt_entry].HDIndex = destination;
+		pageTable[pt_entry].location = HD;
+	}
+	
 	return evictIndex;
 
 }
