@@ -25,25 +25,25 @@ void initPageTable()
 
 void printPageData(pageStruct page)
 {
-	printf("   isLocked: %d\n   isAllocated: %d\n   isDirty: %d\n", page.isLocked, page.isAllocated, page.isDirty);
+	printf("isLocked: %d isAllocated: %d isDirty: %d ", page.isLocked, page.isAllocated, page.isDirty);
 	switch(page.location){
 		case NONE:
-			printf("   memory level: NONE\n");
+			printf("level: NONE ");
 			break;
 		case SSD:
-			printf("   memory level: SSD\n");
+			printf("level: SSD ");
 			break;
 		case RAM:
-			printf("   memory level: RAM\n");
+			printf("level: RAM ");
 			break;
 		case HD:
-			printf("   memory level: HD\n");
+			printf("level: HD ");
 			break;
 		default:
-			printf("   memory level: UNKNOWN");
+			printf("level: UNKNOWN ");
 			break;
 	}
-	printf("   RAMIndex: %d\n   SSDIndex: %d\n   HDIndex: %d\n   lastAccessed: %ld\n", page.RAMIndex, page.SSDIndex, page.HDIndex, page.lastAccessed);
+	printf("RAMIndex: %d SSDIndex: %d HDIndex: %d lastAccessed: %ld \n", page.RAMIndex, page.SSDIndex, page.HDIndex, page.lastAccessed);
 }
 
 //	pass in a page's location in physical memory and return its address in the page table
@@ -60,3 +60,14 @@ vAddr pageTableIndex(int arrayIndex, MemoryLocation loc)
 	}
 }
 
+void printPageTableData()
+{
+	vAddr address;
+	for(address = 0; address < 500; address++)
+	{
+		printf("vAddr: %d ", address);
+		printPageData(pageTable[address]);
+	}
+
+
+}

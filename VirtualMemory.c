@@ -19,26 +19,48 @@ int main(int argc, char* argv[]){
 	initHierarchy();
 	initPageTable();
 
-
-//	int i;
-//	for(i = 0; i < 30; i++)
-//	{
-//		vAddr address1 = allocateNewInt();
-//	}
-
 	vAddr indexes[1000];
-	int i ;
-	for( i = 0; i < 500; i++)
+	int i;
+	for(i = 0; i < 500; i++)
 	{
 		indexes[i] = allocateNewInt();
 		int *value = accessIntPtr(indexes[i]);
+		if(value == NULL){
+			errorWithContext("Unable to access the desired memory");
+			exit(1);
+		}
 		*value = (i * 3);
 		printf("Changing value at vAddr %d to %d\n", indexes[i], RAMArray[pageTable[indexes[i]].RAMIndex]);
 		unlockMemory(indexes[i]);
 	}
-	for( i = 0; i < 500; i++)
+
+	//why isn't this code working?
+	int k;
+	for(k = 0; k < 2; k++)
 	{
-//		printf("Free memory at vAddr %d\n", indexes[i]);
+		printf("Attempting to access and change vAddr %d\n", k);
+
+		int *value = accessIntPtr(indexes[k]);
+		printf("isArrayFull(RAM) is: %d", isArrayFull(RAM));
+		if(value == NULL){
+			errorWithContext("Unable to access the desired memory");
+			exit(1);
+		}
+		*value = (k * 5);
+		printf("value is: %d\n", *value);
+		printf("Re-Changing val at vAddr %d to %d\n", indexes[k], *value);
+		if(RAMArray[pageTable[indexes[k]].RAMIndex] == -1){
+			errorWithContext("The value we just changed is now -1");
+			exit(1);
+		}
+		unlockMemory(indexes[k]);
+	}
+
+	for(i = 0; i < 500; i++)
+	{
+	//	printf("Free memory at vAddr %d\n", indexes[i]);
 		freeMemory(indexes[i]);
 	}
+
+//	printPageTableData();
 }

@@ -38,4 +38,6 @@ void printPageData(pageStruct page);
 
 vAddr pageTableIndex(int arrayIndex, MemoryLocation loc);
 
+void printPageTableData();
+
 #endif
