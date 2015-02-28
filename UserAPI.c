@@ -200,10 +200,14 @@ vAddr allocateNewInt()
 		if(pageTable[i].isAllocated){
 			//instead of returning the index of the array, instead use that index to find
 			//the corresponding vAddr in the page table
-			if (pageTable[i].RAMIndex != -1)
+			if (pageTable[i].RAMIndex != -1) {
 				pagesInRAM++;
-			if (pageTable[i].SSDIndex != -1)
+				printf("Page at Addr %d is in RAM    Page is in RAMIndex %d\n", i, pageTable[i].RAMIndex);
+				}
+			if (pageTable[i].SSDIndex != -1){
 				pagesInSSD++;
+				printf("Page at Addr %d is in SSd    Page is in SSDIndex %d\n", i, pageTable[i].SSDIndex);
+				}
 		}
 		else
 			notAllAllocated = 1;	// page table is not full
@@ -220,7 +224,7 @@ vAddr allocateNewInt()
 		}
 	}
 
-	printf("pagesInRAM: %d\n pagesInSSD: %d\n", pagesInRAM, pagesInSSD);
+	printf("pagesInRAM: %d   pagesInSSD: %d\n", pagesInRAM, pagesInSSD);
 
 	// refuse to allocate more than 1000 pages
 	if (notAllAllocated == 0)
@@ -244,18 +248,20 @@ vAddr allocateNewInt()
 		indexInRAM = evictPageFrom(RAM);
 		printf("Evicted a page from RAM at index %d", indexInRAM);
 
-		vAddr i;
-		for(i = 0; i < 1000; i++)
+		vAddr k;
+		for(k = 0; k < 1000; k++)
 		{
-			if(!pageTable[i].isAllocated)
+			if(!pageTable[k].isAllocated)
 			{
-				pageTable[i].isAllocated = 1;
-				pageTable[i].RAMIndex = indexInRAM;
-				pageTable[i].location = RAM;
+				pageTable[k].isAllocated = 1;
+				pageTable[k].RAMIndex = indexInRAM;
+				pageTable[k].location = RAM;
+
+				printf("Moved a page into RAM at index %d\n", pageTable[k].RAMIndex);
 
 				RAMArray[indexInRAM] = 0;
-				printf("Are you at the success point? \nvAddr is: %d\n", i);
-				return i;
+				printf("Are you at the success point? \nvAddr is: %d\n", k);
+				return k;
 
 			}
 		}
@@ -278,12 +284,13 @@ vAddr allocateNewInt()
 				int j;
 				for(j = 0; j < 25; j++)
 				{
-					if(RAMArray[j] != -1 && RAMArray[j] != 0)
+					if(RAMArray[j] == -1)
 						break;
 				}
 
 				pageTable[i].isAllocated = 1;
 				pageTable[i].RAMIndex = j;
+				printf("RAMIndex for page %d is changed to %d", i, j);
 				RAMArray[j] = 0;
 				pageTable[i].location = RAM;
 
