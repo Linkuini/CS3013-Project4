@@ -67,7 +67,7 @@ int isArrayLocked(MemoryLocation loc)
 		case HD:
 			return HDLocked;
 			break;
-  default:
+	        default:
 			errorWithContext("Invalid input: Not a MemoryLocation!");
 			exit(1);
 			break;
@@ -81,29 +81,29 @@ int findEmptyFrame(MemoryLocation loc)
 	int i;
 
 	switch (loc) {
-  case RAM:
+       		 case RAM:
 			memcap = 25;
 			for (i = 0; i < memcap; i++) {
-    if (RAMArray[i] == -1)
-		return i;
+				if (RAMArray[i] == -1)
+				return i;
 			}
 			break;
-  case SSD:
+		case SSD:
 			memcap = 100;
 			for (i = 0; i < memcap; i++) {
-    if (SSDArray[i] == -1)
-		return i;
+				if (SSDArray[i] == -1)
+				return i;
 			}
 			break;
-  case HD:
-				memcap = 1000;
-				for (i = 0; i < memcap; i++) {
-					if (HDArray[i] == -1)
-						return i;
-				}
+		case HD:
+			memcap = 1000;
+			for (i = 0; i < memcap; i++) {
+				if (HDArray[i] == -1)
+					return i;
+			}
 			break;
 
-  default:
+		default:
 			errorWithContext("Invalid input: Not a MemoryLocation!");
 			break;
 	}
@@ -147,9 +147,44 @@ int evictPageFrom(MemoryLocation location)
 	// find an empty space in slower memory
 	int destination;		// address of unallocated page frame
 
+	//Make sure the most recently accessed value in the RAM or SSD is copied to lower pages
+	if(location == RAM)
+	{
+		int currentMemVal = RAMArray[evictIndex];
+
+		//update the lower memory pages if necessary
+		if(pageTable[pt_entry].SSDIndex != -1){
+			RAMArray[evictIndex] = -1;
+			SSDArray[pageTable[pt_entry].SSDIndex] = currentMemVal;
+		}
+		if(pageTable[pt_entry].HDIndex != -1){
+			RAMArray[evictIndex] = -1;
+			HDArray[pageTable[pt_entry].HDIndex] = currentMemVal;
+		}
+
+		//check to see if the page is already in SSD. If already there, return
+		if(pageTable[pt_entry].SSDIndex != -1)
+			return evictIndex;
+	}
+	else if(location == SSD)
+	{
+		int currentMemVal = SSDArray[evictIndex];
+
+		if(pageTable[pt_entry].HDIndex != -1){
+			SSDArray[evictIndex] = -1;
+			HDArray[pageTable[pt_entry].HDIndex] = currentMemVal;
+			return evictIndex;
+		}
+
+	}
+
 	if (location == RAM) {
-		if (isArrayFull(SSD))			// if SSD is full, perform a cascading eviction
+		if (isArrayFull(SSD)){			// if SSD is full, perform a cascading eviction
 			destination = evictPageFrom(SSD);
+			if(destination == -1)
+				errorWithContext("Unable to evict a page from SSD");
+				exit(1);
+			}
 		else							// otherwise just find an empty spot
 			destination = findEmptyFrame(SSD);
 	}
