@@ -79,7 +79,7 @@ int findEmptyFrame(MemoryLocation loc)
 {
 	int memcap;		// number of frames in this layer of physical memory
 	int i;
-	
+
 	switch (loc) {
   case RAM:
 			memcap = 25;
@@ -102,12 +102,12 @@ int findEmptyFrame(MemoryLocation loc)
 						return i;
 				}
 			break;
-			
+
   default:
 			errorWithContext("Invalid input: Not a MemoryLocation!");
 			break;
 	}
-	
+
 	// return -1 if we don't find an empty frame
 	return -1;
 }
@@ -132,21 +132,21 @@ int evictPageFrom(MemoryLocation location)
 
 	// evict a page at random
 	evictIndex = rand() % memcap;
-	
+
 	// make sure the page we find isn't locked
 	vAddr pt_entry;		// the page table address of the page to be evicted
-	
+
 	pt_entry = pageTableIndex(evictIndex, location);
-	
+
 	// if the page is locked, rummage through pages until we find one that isn't
 	while (pageTable[pt_entry].isLocked) {
 		evictIndex = rand() % memcap;
 		pt_entry = pageTableIndex(evictIndex, location);
 	}
-	
+
 	// find an empty space in slower memory
 	int destination;		// address of unallocated page frame
-	
+
 	if (location == RAM) {
 		if (isArrayFull(SSD))			// if SSD is full, perform a cascading eviction
 			destination = evictPageFrom(SSD);
@@ -155,7 +155,7 @@ int evictPageFrom(MemoryLocation location)
 	}
 	else if (location == SSD)
 		destination = findEmptyFrame(HD);
-	
+
 	// assign value of evicted page to empty space
 	if (location == RAM) {
 		SSDArray[destination] = RAMArray[evictIndex];
@@ -166,7 +166,7 @@ int evictPageFrom(MemoryLocation location)
 		pageTable[pt_entry].SSDIndex = destination;
 		pageTable[pt_entry].location = SSD;
 	}
-	
+
 	if (location == SSD) {
 		HDArray[destination] = SSDArray[evictIndex];
 		// remove value from location in memory
@@ -176,7 +176,7 @@ int evictPageFrom(MemoryLocation location)
 		pageTable[pt_entry].HDIndex = destination;
 		pageTable[pt_entry].location = HD;
 	}
-	
+
 	return evictIndex;
 
 }
@@ -246,12 +246,20 @@ vAddr allocateNewInt()
 		//if the RAM and SSD are both full, evict a page from the SSD and then evict from the RAM
 		if(pagesInSSD == 100)
 		{
-			evictPageFrom(SSD);
-
+			if(evictPageFrom(SSD) == -1){
+				errorWithContext("Not able to evict a page from SSD");
+				return -1;
+			}
 
 		}
 		// evict a page from RAM to make room, return the newly opened index in RAM
 		indexInRAM = evictPageFrom(RAM);
+
+		if(indexInRAM == -1){
+			errorWithContext("Not able to evict a page from SSD");
+			return -1;
+		}
+
 		printf("Evicted a page from RAM at index %d", indexInRAM);
 
 		vAddr k;
@@ -347,6 +355,11 @@ int *accessIntPtr(vAddr address)
 	{
 		int newlyOpenedIndexInRAM = evictPageFrom(SSD);
 
+		if(newlyOpenedIndexInRAM == -1){
+			errorWithContext("Not able to evict a page from SSD");
+			return NULL;
+		}
+
 		RAMArray[newlyOpenedIndexInRAM] = 0;
 
 		structOfInterest.RAMIndex = newlyOpenedIndexInRAM;
@@ -361,9 +374,17 @@ int *accessIntPtr(vAddr address)
 	{
 		int newlyOpenedIndexInRAM;
 
-		evictPageFrom(HD);
+		if(evictPageFrom(SSD)== -1){
+			errorWithContext("Not able to evict a page from SSD");
+			return NULL;
+		}
 
-		newlyOpenedIndexInRAM = evictPageFrom(SSD);
+		newlyOpenedIndexInRAM = evictPageFrom(RAM);
+
+		if(newlyOpenedIndexInRAM == -1){
+			errorWithContext("Not able to evict a page from RAM");
+			return NULL;
+		}
 
 		RAMArray[newlyOpenedIndexInRAM] = 0;
 
@@ -375,10 +396,9 @@ int *accessIntPtr(vAddr address)
 	}
 
 
-	//use the data in the page struct to move the corresponding page into RAM if not already
-
-	//return the address of the memory located in RAM
-
+	//If you have gotten here, something has gone wrong
+	errorWithContext("Reached end of AccessIntPtr without return");
+	exit(1);
 }
 
 /* Unlocks the memory, allowing it to be swapped out to disk if needed. This command makes all previous
