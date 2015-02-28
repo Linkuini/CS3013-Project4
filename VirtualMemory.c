@@ -20,9 +20,25 @@ int main(int argc, char* argv[]){
 	initPageTable();
 
 
-	int i;
-	for(i = 0; i < 30; i++)
+//	int i;
+//	for(i = 0; i < 30; i++)
+//	{
+//		vAddr address1 = allocateNewInt();
+//	}
+
+	vAddr indexes[1000];
+	int i ;
+	for( i = 0; i < 150; i++)
 	{
-		vAddr address1 = allocateNewInt();
+		indexes[i] = allocateNewInt();
+		int *value = accessIntPtr(indexes[i]);
+		*value = (i * 3);
+		printf("Changing value at vAddr %d to %d", indexes[i], RAMArray[pageTable[indexes[i]].RAMIndex]);
+		unlockMemory(indexes[i]);
+	}
+	for( i = 0; i < 150; i++)
+	{
+		printf("Free memory at vAddr %d\n", indexes[i]);
+		freeMemory(indexes[i]);
 	}
 }

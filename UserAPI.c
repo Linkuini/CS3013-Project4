@@ -189,6 +189,7 @@ vAddr allocateNewInt()
 	// Find out how many pages exist in RAM or SSD
 	int pagesInRAM = 0;
 	int pagesInSSD = 0;
+	int pagesInHD = 0;
 
 	// If this flag is still 0 when we get to the end of the page table,
 	// the table's full!
@@ -206,9 +207,14 @@ vAddr allocateNewInt()
 				}
 			if (pageTable[i].SSDIndex != -1){
 				pagesInSSD++;
-				printf("Page at Addr %d is in SSd    Page is in SSDIndex %d\n", i, pageTable[i].SSDIndex);
+				printf("Page at Addr %d is in SSD    Page is in SSDIndex %d\n", i, pageTable[i].SSDIndex);
 				}
-		}
+			if(pageTable[i].HDIndex != -1){
+				pagesInHD++;
+				printf("Page at Addr %d is in HD    Page is in SSDIndex %d\n", i, pageTable[i].HDIndex);
+
+				}
+	}
 		else
 			notAllAllocated = 1;	// page table is not full
 
@@ -224,7 +230,7 @@ vAddr allocateNewInt()
 		}
 	}
 
-	printf("pagesInRAM: %d   pagesInSSD: %d\n", pagesInRAM, pagesInSSD);
+	printf("pagesInRAM: %d   pagesInSSD: %d   pagesInHD: %d\n", pagesInRAM, pagesInSSD, pagesInHD);
 
 	// refuse to allocate more than 1000 pages
 	if (notAllAllocated == 0)
