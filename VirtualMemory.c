@@ -28,17 +28,17 @@ int main(int argc, char* argv[]){
 
 	vAddr indexes[1000];
 	int i ;
-	for( i = 0; i < 150; i++)
+	for( i = 0; i < 500; i++)
 	{
 		indexes[i] = allocateNewInt();
 		int *value = accessIntPtr(indexes[i]);
 		*value = (i * 3);
-		printf("Changing value at vAddr %d to %d", indexes[i], RAMArray[pageTable[indexes[i]].RAMIndex]);
+		printf("Changing value at vAddr %d to %d\n", indexes[i], RAMArray[pageTable[indexes[i]].RAMIndex]);
 		unlockMemory(indexes[i]);
 	}
-	for( i = 0; i < 150; i++)
+	for( i = 0; i < 500; i++)
 	{
-		printf("Free memory at vAddr %d\n", indexes[i]);
+//		printf("Free memory at vAddr %d\n", indexes[i]);
 		freeMemory(indexes[i]);
 	}
 }

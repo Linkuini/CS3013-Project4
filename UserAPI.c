@@ -238,15 +238,15 @@ vAddr allocateNewInt()
 			//the corresponding vAddr in the page table
 			if (pageTable[i].RAMIndex != -1) {
 				pagesInRAM++;
-				printf("Page at Addr %d is in RAM    Page is in RAMIndex %d\n", i, pageTable[i].RAMIndex);
+//				printf("Page at Addr %d is in RAM    Page is in RAMIndex %d\n", i, pageTable[i].RAMIndex);
 				}
 			if (pageTable[i].SSDIndex != -1){
 				pagesInSSD++;
-				printf("Page at Addr %d is in SSD    Page is in SSDIndex %d\n", i, pageTable[i].SSDIndex);
+//				printf("Page at Addr %d is in SSD    Page is in SSDIndex %d\n", i, pageTable[i].SSDIndex);
 				}
 			if(pageTable[i].HDIndex != -1){
 				pagesInHD++;
-				printf("Page at Addr %d is in HD    Page is in SSDIndex %d\n", i, pageTable[i].HDIndex);
+//				printf("Page at Addr %d is in HD    Page is in SSDIndex %d\n", i, pageTable[i].HDIndex);
 
 				}
 	}
@@ -309,7 +309,7 @@ vAddr allocateNewInt()
 				printf("Moved a page into RAM at index %d\n", pageTable[k].RAMIndex);
 
 				RAMArray[indexInRAM] = 0;
-				printf("Are you at the success point? \nvAddr is: %d\n", k);
+				printf("vAddr is: %d\n", k);
 				return k;
 
 			}
@@ -343,7 +343,7 @@ vAddr allocateNewInt()
 				RAMArray[j] = 0;
 				pageTable[i].location = RAM;
 
-				printf("Successfully reached end\nReturn is: %d\n\n", i);
+//				printf("Successfully reached end\nReturn is: %d\n\n", i);
 
 				return i;
 
@@ -388,10 +388,10 @@ int *accessIntPtr(vAddr address)
 	//if the page is not in RAM but is currently in SSD, evict a page from SSD
 	else if(structOfInterest.location == SSD)
 	{
-		int newlyOpenedIndexInRAM = evictPageFrom(SSD);
+		int newlyOpenedIndexInRAM = evictPageFrom(RAM);
 
 		if(newlyOpenedIndexInRAM == -1){
-			errorWithContext("Not able to evict a page from SSD");
+			errorWithContext("Not able to evict a page from RAM");
 			return NULL;
 		}
 
@@ -407,12 +407,19 @@ int *accessIntPtr(vAddr address)
 	//page is in HD. evict page from SSD and then from RAM
 	else if(structOfInterest.location == HD)
 	{
+		int memVal = HDArray[structOfInterest.HDIndex];
 		int newlyOpenedIndexInRAM;
+		int newlyOpenedIndexInSSD;
 
-		if(evictPageFrom(SSD)== -1){
+		newlyOpenedIndexInSSD = evictPageFrom(SSD);
+
+		if(newlyOpenedIndexInSSD == -1){
 			errorWithContext("Not able to evict a page from SSD");
 			return NULL;
 		}
+
+		structOfInterest.SSDIndex = newlyOpenedIndexInSSD;
+		SSDArray[newlyOpenedIndexInSSD] = memVal;
 
 		newlyOpenedIndexInRAM = evictPageFrom(RAM);
 
@@ -421,7 +428,7 @@ int *accessIntPtr(vAddr address)
 			return NULL;
 		}
 
-		RAMArray[newlyOpenedIndexInRAM] = 0;
+		RAMArray[newlyOpenedIndexInRAM] = memVal;
 
 		structOfInterest.RAMIndex = newlyOpenedIndexInRAM;
 		structOfInterest.isDirty = 1;
