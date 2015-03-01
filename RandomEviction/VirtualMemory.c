@@ -73,7 +73,7 @@ void accessTwice()		// attempt to access the same page twice
 		indexes[i] = allocateNewInt();
 		int *value = accessIntPtr(indexes[i]);
 		*value = (i * 3);
-		*value = accessIntPtr(indexes[i]);
+		value = accessIntPtr(indexes[i]);
 		*value = (i * 3);
 		unlockMemory(indexes[i]);
 	}
@@ -98,12 +98,12 @@ void mainTest()		// we used this to test general functionality during developmen
 		printf("Changing value at vAddr %d to %d\n", indexes[i], RAMArray[pageTable[indexes[i]].RAMIndex]);
 		unlockMemory(indexes[i]);
 	}
-	
+
 	int k;
-	for(k = 0; k < 500; k++)
+	for(k = 0; k < 130; k++)
 	{
 		printf("Attempting to access and change vAddr %d\n", k);
-		
+
 		int *value = accessIntPtr(indexes[k]);
 		//printf("isArrayFull(RAM) is: %d", isArrayFull(RAM));
 		if(value == NULL){
@@ -121,7 +121,7 @@ void mainTest()		// we used this to test general functionality during developmen
 	}
 	//print the pageTable before freeing all the memory
 	printPageTableData();
-	
+
 	for(i = 0; i < 130; i++)
 	{
 		//	printf("Free memory at vAddr %d\n", indexes[i]);
@@ -132,52 +132,40 @@ void mainTest()		// we used this to test general functionality during developmen
 int main(int argc, char* argv[]){
 	srand(time(NULL));
 
-	//initialize the memory and set up for use
-	initHierarchy();
+	//initialize the page table and the memory hierarchy
 	initPageTable();
+	initHierarchy();
 
-	vAddr indexes[1000];
-	int i;
-	for(i = 0; i < 130; i++)
+	if(argc > 2 || argc == 1)
 	{
-		indexes[i] = allocateNewInt();
-		int *value = accessIntPtr(indexes[i]);
-		if(value == NULL){
-			errorWithContext("Unable to access the desired memory");
-			exit(1);
+		mainTest();
+	}
+	else
+	{
+		switch(atoi(argv[1])){
+			case 1:
+				memoryMaxer();
+				break;
+			case 2:
+				memoryOverload();
+				break;
+			case 3:
+				tryLock();
+				break;
+			case 4:
+				accessNothing();
+				break;
+			case 5:
+				accessTwice();
+				break;
+			default:
+				mainTest();
+				break;
 		}
-		*value = (i * 3);
-		printf("Changing value at vAddr %d to %d\n", indexes[i], RAMArray[pageTable[indexes[i]].RAMIndex]);
-		unlockMemory(indexes[i]);
+
+
+
 	}
 
-	int k;
-	for(k = 0; k < 500; k++)
-	{
-		printf("Attempting to access and change vAddr %d\n", k);
-
-		int *value = accessIntPtr(indexes[k]);
-		//printf("isArrayFull(RAM) is: %d", isArrayFull(RAM));
-		if(value == NULL){
-			errorWithContext("Unable to access the desired memory");
-			exit(1);
-		}
-		*value = (*value * 5);
-		//printf("value is: %d\n", *value);
-		printf("Re-Changing val at vAddr %d to %d\n", indexes[k], *value);
-		if(RAMArray[pageTable[indexes[k]].RAMIndex] == -1){
-			errorWithContext("The value we just changed is now -1");
-			exit(1);
-		}
-		unlockMemory(indexes[k]);
-	}
-	//print the pageTable before freeing all the memory
-	printPageTableData();
-
-	for(i = 0; i < 130; i++)
-	{
-	//	printf("Free memory at vAddr %d\n", indexes[i]);
-		freeMemory(indexes[i]);
-	}
 
 }
