@@ -5,8 +5,20 @@ Team 48
 Alexandra Bittle - albittle
 Anthony Tamburri - ajtamburri
 
-This project handles the creation ofand usage of a virtual memory system including a RAM, SSD, and HD using arrays and delays.
+This project handles the creation of and usage of a virtual memory system including a RAM, SSD, and HD using arrays and delays.
 The folder RandomEviction implements a page eviction algorithm which randomly selects a page from the necessary array and
 evicts it. The folder HistoryEviction implements a LRU page eviction algorithm. 
 
-To run compile either of these programs, enter the given folder and enter "make". Then, to compile enter "./VirtualMemory"
+Our programs do not support multithreading and have not implemented mutual exclusion.
+
+To run compile either of these programs, enter the given folder and enter "make". Then, to compile enter "./VirtualMemory <NUMBER>" where NUMBER
+is an integer from 0 to 5, and determines which function to run in the main function. If a number is not specified, or is specified to be a number
+outside of this range, the program will run our default test. The functions related to their numbers are shown below:
+
+0 - mainTest() - default testing function, used for debugging during development
+1 - memoryMaxer() - function given in the project description. This program fills the memory, changes their values, and then frees the memory
+2 - memoryOverload() - attempts to allocate more memory which is allowed
+3 - tryLock() - attempts to add or evict pages from a memory which is completely locked
+4 - accessNothing - attempts to call accessIntPtr without allocating memory previously
+5 - accessTwice() - attempts to access and change the memory in two different loops
+ 

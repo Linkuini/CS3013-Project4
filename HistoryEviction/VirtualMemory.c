@@ -12,13 +12,78 @@
 #include "UserAPI.h"
 #include "pageTable.h"
 
-int main(int argc, char* argv[]){
-	srand(time(NULL));
+void memoryMaxer()		// allocates all pages, assigns them a value, unlocks, and then frees them
+{
+	vAddr indexes[1000];
+	for (int i = 0; i < 1000; ++i) {
+		indexes[i] = allocateNewInt();
+		int *value = accessIntPtr(indexes[i]);
+		*value = (i * 3);
+		unlockMemory(indexes[i]);
+	}
+	for (int i = 0; i < 1000; ++i) {
+		freeMemory(indexes[i]);
+	}
+}
 
-	//initialize the memory and set up for use
-	initHierarchy();
-	initPageTable();
+void memoryOverload()	// allocate memory until capacity is exceeded
+{
+	vAddr indexes[1000];
+	for (int i = 0; i < 1001; ++i) {
+		indexes[i] = allocateNewInt();
+		int *value = accessIntPtr(indexes[i]);
+		*value = (i * 3);
+		unlockMemory(indexes[i]);
+	}
+	for (int i = 0; i < 1000; ++i) {
+		freeMemory(indexes[i]);
+	}
+}
 
+void tryLock()		// attempt to evict a locked page from RAM
+{
+	vAddr indexes[1000];
+	for (int i = 0; i < 130; ++i) {
+		indexes[i] = allocateNewInt();
+		int *value = accessIntPtr(indexes[i]);
+		*value = (i * 3);
+	}
+	for (int i = 0; i < 130; ++i) {
+		indexes[i+130] = allocateNewInt();
+	}
+}
+
+void accessNothing()		// attempt to access a page that has not been allocated
+{
+	vAddr indexes[1000];
+	for (int i = 0; i < 130; ++i) {
+		int *value = accessIntPtr(indexes[i]);
+		*value = (i * 3);
+		unlockMemory(indexes[i]);
+	}
+	for (int i = 0; i < 130; ++i) {
+		freeMemory(indexes[i]);
+	}
+}
+
+void accessTwice()		// attempt to access the same page twice
+{
+	vAddr indexes[1000];
+	for (int i = 0; i < 130; ++i) {
+		indexes[i] = allocateNewInt();
+		int *value = accessIntPtr(indexes[i]);
+		*value = (i * 3);
+		value = accessIntPtr(indexes[i]);
+		*value = (i * 3);
+		unlockMemory(indexes[i]);
+	}
+	for (int i = 0; i < 130; ++i) {
+		freeMemory(indexes[i]);
+	}
+}
+
+void mainTest()		// we used this to test general functionality during development
+{
 	vAddr indexes[1000];
 	int i;
 	for(i = 0; i < 130; i++)
@@ -59,8 +124,48 @@ int main(int argc, char* argv[]){
 
 	for(i = 0; i < 130; i++)
 	{
-	//	printf("Free memory at vAddr %d\n", indexes[i]);
+		//	printf("Free memory at vAddr %d\n", indexes[i]);
 		freeMemory(indexes[i]);
 	}
+}
+
+int main(int argc, char* argv[]){
+	srand(time(NULL));
+
+	//initialize the page table and the memory hierarchy
+	initPageTable();
+	initHierarchy();
+
+	if(argc > 2 || argc == 1)
+	{
+		mainTest();
+	}
+	else
+	{
+		switch(atoi(argv[1])){
+			case 1:
+				memoryMaxer();
+				break;
+			case 2:
+				memoryOverload();
+				break;
+			case 3:
+				tryLock();
+				break;
+			case 4:
+				accessNothing();
+				break;
+			case 5:
+				accessTwice();
+				break;
+			default:
+				mainTest();
+				break;
+		}
+
+
+
+	}
+
 
 }
