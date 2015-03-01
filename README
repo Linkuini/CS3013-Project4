@@ -1,0 +1,12 @@
+CS3013 Project 4
+2/28/15
+
+Team 48
+Alexandra Bittle - albittle
+Anthony Tamburri - ajtamburri
+
+This project handles the creation ofand usage of a virtual memory system including a RAM, SSD, and HD using arrays and delays.
+The folder RandomEviction implements a page eviction algorithm which randomly selects a page from the necessary array and
+evicts it. The folder HistoryEviction implements a LRU page eviction algorithm. 
+
+To run compile either of these programs, enter the given folder and enter "make". Then, to compile enter "./VirtualMemory"
