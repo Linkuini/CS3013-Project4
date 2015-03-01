@@ -40,4 +40,6 @@ vAddr pageTableIndex(int arrayIndex, MemoryLocation loc);
 
 void printPageTableData();
 
+void updateAccessTime(pageStruct *page);
+
 #endif

@@ -131,20 +131,35 @@ int evictPageFrom(MemoryLocation location)
 	else if (location == SSD)
 		memcap = 100;
 
-	// evict a page at random
-	evictIndex = rand() % memcap;
+	// find least-recently accessed page in page table
+	vAddr lru_page = -1;		// least-recently accessed page so far
+	long earliest_access;		// time said page was accessed
+	vAddr next_page;		// page we will compare to
+	int i;				// loop variable
 
-	// make sure the page we find isn't locked
+	for (i=0; i < memcap; i++)
+	{
+		next_page = pageTableIndex(i, location);
+		// if we're just starting, assume the first page is lru
+		if(i == 0)
+		{
+			lru_page = next_page;
+			earliest_access = pageTable[next_page].lastAccessed;
+			evictIndex = i;
+		}	// otherwise, see if the next one was accessed less recently
+		else if (earliest_access > pageTable[next_page].lastAccessed && !pageTable[next_page].isLocked)
+		{
+			lru_page = next_page;
+			earliest_access = pageTable[next_page].lastAccessed;
+			evictIndex = i;
+		}
+		
+	}
+	
+
 	vAddr pt_entry;		// the page table address of the page to be evicted
 
-	//printf("   about to call pageTableIndex\n");
-	pt_entry = pageTableIndex(evictIndex, location);
-
-	// if the page is locked, rummage through pages until we find one that isn't
-	while (pageTable[pt_entry].isLocked) {
-		evictIndex = rand() % memcap;
-		pt_entry = pageTableIndex(evictIndex, location);
-	}
+	pt_entry = lru_page;
 
 	//printf("   Found a page to evict which is unlocked\n");
 
@@ -173,7 +188,10 @@ int evictPageFrom(MemoryLocation location)
 
 		//check to see if the page is already in SSD. If already there, return
 		if(pageTable[pt_entry].SSDIndex != -1)
+		{
+			updateAccessTime(&pageTable[pt_entry]);
 			return evictIndex;
+		}
 	}
 	else if(location == SSD)
 	{
@@ -186,6 +204,7 @@ int evictPageFrom(MemoryLocation location)
 			pageTable[pt_entry].SSDIndex = -1;
 			HDArray[pageTable[pt_entry].HDIndex] = currentMemVal;
 			//printf("   copying page from SSD into HD. Value is %d \n", currentMemVal);
+			updateAccessTime(&pageTable[pt_entry]);
 			return evictIndex;
 		}
 
@@ -232,6 +251,7 @@ int evictPageFrom(MemoryLocation location)
 	}
 
 	//printf("   returning final value of %d\n", evictIndex);
+	updateAccessTime(&pageTable[pt_entry]);
 	return evictIndex;
 
 }
@@ -330,6 +350,7 @@ vAddr allocateNewInt()
 
 				RAMArray[indexInRAM] = 0;
 				printf("vAddr is: %d\n", k);
+				updateAccessTime(&pageTable[k]);
 				return k;
 
 			}
@@ -364,7 +385,7 @@ vAddr allocateNewInt()
 				pageTable[i].location = RAM;
 
 //				printf("Successfully reached end\nReturn is: %d\n\n", i);
-
+				updateAccessTime(&pageTable[i]);
 				return i;
 
 			}
@@ -399,13 +420,13 @@ int *accessIntPtr(vAddr address)
 		printf("Page is in RAM\n");
 		structOfInterest->isDirty = 1;
 		structOfInterest->isLocked = 1;
+		updateAccessTime(structOfInterest);
 		return &RAMArray[structOfInterest->RAMIndex];
 	}
 	//if the page is not in RAM but is currently in SSD, evict a page from SSD
 	else if(structOfInterest->SSDIndex != -1)
 	{
-		printf("delay .25 sec\n");
-		usleep(250000);
+		
 		int memVal = SSDArray[structOfInterest->SSDIndex];
 		//printf("page is in SSD\n");
 		int newlyOpenedIndexInRAM = evictPageFrom(RAM);
@@ -421,15 +442,15 @@ int *accessIntPtr(vAddr address)
 		structOfInterest->RAMIndex = newlyOpenedIndexInRAM;
 		structOfInterest->isDirty = 1;
 		structOfInterest->isLocked = 1;
-
+		
+		updateAccessTime(structOfInterest);
 		return &RAMArray[structOfInterest->RAMIndex];
 
 	}
 	//page is in HD. evict page from SSD and then from RAM
 	else if(structOfInterest->HDIndex != -1)
 	{
-		printf("delay 2.5 sec\n");
-		usleep(2500000);
+		
 		//printf("Page is in HD\n");
 		int memVal = HDArray[structOfInterest->HDIndex];
 		int newlyOpenedIndexInRAM;
@@ -471,6 +492,7 @@ int *accessIntPtr(vAddr address)
 		structOfInterest->isLocked = 1;
 
 		//printf("Returning ptr to RAM\n");
+		updateAccessTime(structOfInterest);
 		return &RAMArray[structOfInterest->RAMIndex];
 	}
 
@@ -486,6 +508,7 @@ void unlockMemory(vAddr address)
 	//change the isLocked variable to unlocked (0)
 	pageTable[address].isLocked = 0;
 
+	updateAccessTime(&pageTable[address]);
 	//should we do anything here about updating the arrays to have the same value? due to dirty bit
 
 }

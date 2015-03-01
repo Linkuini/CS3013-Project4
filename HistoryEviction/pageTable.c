@@ -26,23 +26,6 @@ void initPageTable()
 void printPageData(pageStruct page)
 {
 	printf("isLocked: %d isAllocated: %d isDirty: %d ", page.isLocked, page.isAllocated, page.isDirty);
-	switch(page.location){
-		case NONE:
-			printf("level: NONE ");
-			break;
-		case SSD:
-			printf("level: SSD ");
-			break;
-		case RAM:
-			printf("level: RAM ");
-			break;
-		case HD:
-			printf("level: HD ");
-			break;
-		default:
-			printf("level: UNKNOWN ");
-			break;
-	}
 	printf("RAMIndex: %d SSDIndex: %d HDIndex: %d lastAccessed: %ld \n", page.RAMIndex, page.SSDIndex, page.HDIndex, page.lastAccessed);
 }
 
@@ -63,7 +46,7 @@ vAddr pageTableIndex(int arrayIndex, MemoryLocation loc)
 void printPageTableData()
 {
 	vAddr address;
-	for(address = 0; address < 50; address++)
+	for(address = 0; address < 150; address++)
 	{
 		printf("vAddr: %d ", address);
 		printPageData(pageTable[address]);
@@ -71,3 +54,12 @@ void printPageTableData()
 
 
 }
+
+void updateAccessTime(pageStruct *page)
+{
+	struct timeval aTime;
+	gettimeofday(&aTime, NULL);
+	page->lastAccessed = aTime.tv_sec;
+}
+
+

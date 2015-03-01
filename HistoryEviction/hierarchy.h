@@ -1,6 +1,7 @@
 #ifndef _HIERARCHY_H
 #define _HIERARCHY_H
 
+#include <sys/time.h>
 #include "Error.h"
 
 int RAMArray[25];
