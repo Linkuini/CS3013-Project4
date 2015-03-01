@@ -404,8 +404,7 @@ int *accessIntPtr(vAddr address)
 	//if the page is not in RAM but is currently in SSD, evict a page from SSD
 	else if(structOfInterest->SSDIndex != -1)
 	{
-		printf("delay .25 sec\n");
-		usleep(250000);
+		
 		int memVal = SSDArray[structOfInterest->SSDIndex];
 		//printf("page is in SSD\n");
 		int newlyOpenedIndexInRAM = evictPageFrom(RAM);
@@ -428,8 +427,7 @@ int *accessIntPtr(vAddr address)
 	//page is in HD. evict page from SSD and then from RAM
 	else if(structOfInterest->HDIndex != -1)
 	{
-		printf("delay 2.5 sec\n");
-		usleep(2500000);
+		
 		//printf("Page is in HD\n");
 		int memVal = HDArray[structOfInterest->HDIndex];
 		int newlyOpenedIndexInRAM;

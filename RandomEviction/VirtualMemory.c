@@ -21,7 +21,7 @@ int main(int argc, char* argv[]){
 
 	vAddr indexes[1000];
 	int i;
-	for(i = 0; i < 500; i++)
+	for(i = 0; i < 130; i++)
 	{
 		indexes[i] = allocateNewInt();
 		int *value = accessIntPtr(indexes[i]);
@@ -34,8 +34,7 @@ int main(int argc, char* argv[]){
 		unlockMemory(indexes[i]);
 	}
 
-	//why isn't this code working?
-/*	int k;
+	int k;
 	for(k = 0; k < 500; k++)
 	{
 		printf("Attempting to access and change vAddr %d\n", k);
@@ -55,10 +54,10 @@ int main(int argc, char* argv[]){
 		}
 		unlockMemory(indexes[k]);
 	}
-*/	//print the pageTable before freeing all the memory
+	//print the pageTable before freeing all the memory
 	printPageTableData();
 
-	for(i = 0; i < 500; i++)
+	for(i = 0; i < 130; i++)
 	{
 	//	printf("Free memory at vAddr %d\n", indexes[i]);
 		freeMemory(indexes[i]);
