@@ -63,7 +63,7 @@ vAddr pageTableIndex(int arrayIndex, MemoryLocation loc)
 void printPageTableData()
 {
 	vAddr address;
-	for(address = 0; address < 500; address++)
+	for(address = 0; address < 50; address++)
 	{
 		printf("vAddr: %d ", address);
 		printPageData(pageTable[address]);

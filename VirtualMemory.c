@@ -35,19 +35,19 @@ int main(int argc, char* argv[]){
 	}
 
 	//why isn't this code working?
-	int k;
-	for(k = 0; k < 2; k++)
+/*	int k;
+	for(k = 0; k < 500; k++)
 	{
 		printf("Attempting to access and change vAddr %d\n", k);
 
 		int *value = accessIntPtr(indexes[k]);
-		printf("isArrayFull(RAM) is: %d", isArrayFull(RAM));
+		//printf("isArrayFull(RAM) is: %d", isArrayFull(RAM));
 		if(value == NULL){
 			errorWithContext("Unable to access the desired memory");
 			exit(1);
 		}
-		*value = (k * 5);
-		printf("value is: %d\n", *value);
+		*value = (*value * 5);
+		//printf("value is: %d\n", *value);
 		printf("Re-Changing val at vAddr %d to %d\n", indexes[k], *value);
 		if(RAMArray[pageTable[indexes[k]].RAMIndex] == -1){
 			errorWithContext("The value we just changed is now -1");
@@ -55,6 +55,8 @@ int main(int argc, char* argv[]){
 		}
 		unlockMemory(indexes[k]);
 	}
+*/	//print the pageTable before freeing all the memory
+	printPageTableData();
 
 	for(i = 0; i < 500; i++)
 	{
@@ -62,5 +64,4 @@ int main(int argc, char* argv[]){
 		freeMemory(indexes[i]);
 	}
 
-//	printPageTableData();
 }

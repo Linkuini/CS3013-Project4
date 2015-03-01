@@ -5,6 +5,7 @@
 #include "pageTable.h"
 #include <stdio.h>//for printf
 #include <stdlib.h>
+#include <unistd.h>
 
 // helper function wich ckecks to see if a given array in memory is full
 int isArrayFull(MemoryLocation loc)
@@ -118,7 +119,7 @@ int evictPageFrom(MemoryLocation location)
 {
 	// return error if all pages in array we are evicting from are locked
 	if (isArrayLocked(location)) {
-		printf("Sorry, all pages locked.\n");
+		//printf("Sorry, all pages locked.\n");
 		return -1;
 	}
 
@@ -136,7 +137,7 @@ int evictPageFrom(MemoryLocation location)
 	// make sure the page we find isn't locked
 	vAddr pt_entry;		// the page table address of the page to be evicted
 
-	printf("   about to call pageTableIndex\n");
+	//printf("   about to call pageTableIndex\n");
 	pt_entry = pageTableIndex(evictIndex, location);
 
 	// if the page is locked, rummage through pages until we find one that isn't
@@ -145,7 +146,7 @@ int evictPageFrom(MemoryLocation location)
 		pt_entry = pageTableIndex(evictIndex, location);
 	}
 
-	printf("   Found a page to evict which is unlocked\n");
+	//printf("   Found a page to evict which is unlocked\n");
 
 	// find an empty space in slower memory
 	int destination;		// address of unallocated page frame
@@ -153,19 +154,21 @@ int evictPageFrom(MemoryLocation location)
 	//Make sure the most recently accessed value in the RAM or SSD is copied to lower pages
 	if(location == RAM)
 	{
+		usleep(250000);
 		int currentMemVal = RAMArray[evictIndex];
-		printf("previous memory value (eviction from RAM) is: %d \n", currentMemVal);
+		//printf("previous memory value (eviction from RAM) is: %d \n", currentMemVal);
 
 		//update the lower memory pages if necessary
 		if(pageTable[pt_entry].SSDIndex != -1){
+			pageTable[pt_entry].RAMIndex = -1;
 			RAMArray[evictIndex] = -1;
 			SSDArray[pageTable[pt_entry].SSDIndex] = currentMemVal;
-			printf("   copying page from RAM into SSD\n");
+			//printf("   copying page from RAM into SSD\n");
 		}
 		if(pageTable[pt_entry].HDIndex != -1){
 			RAMArray[evictIndex] = -1;
 			HDArray[pageTable[pt_entry].HDIndex] = currentMemVal;
-			printf("   copying page from RAM into HD\n");
+			//printf("   copying page from RAM into HD\n");
 		}
 
 		//check to see if the page is already in SSD. If already there, return
@@ -174,13 +177,15 @@ int evictPageFrom(MemoryLocation location)
 	}
 	else if(location == SSD)
 	{
+		usleep(2500000);
 		int currentMemVal = SSDArray[evictIndex];
-		printf("previous memory value (eviction from SSD) is: %d \n", currentMemVal);
+		//printf("previous memory value (eviction from SSD) is: %d \n", currentMemVal);
 
 		if(pageTable[pt_entry].HDIndex != -1){
 			SSDArray[evictIndex] = -1;
+			pageTable[pt_entry].SSDIndex = -1;
 			HDArray[pageTable[pt_entry].HDIndex] = currentMemVal;
-			printf("   copying page from SSD into HD. Value is %d \n", currentMemVal);
+			//printf("   copying page from SSD into HD. Value is %d \n", currentMemVal);
 			return evictIndex;
 		}
 
@@ -188,9 +193,9 @@ int evictPageFrom(MemoryLocation location)
 
 	if (location == RAM) {
 		if (isArrayFull(SSD)){			// if SSD is full, perform a cascading eviction
-			printf("   evicting from RAM and SSD is full\n");
+			//printf("   evicting from RAM and SSD is full\n");
 			destination = evictPageFrom(SSD);
-			printf("   successfully evicted a page from SSD \n");
+			//printf("   successfully evicted a page from SSD \n");
 			if(destination == -1){
 				errorWithContext("   Unable to evict a page from SSD");
 				exit(1);
@@ -200,13 +205,13 @@ int evictPageFrom(MemoryLocation location)
 			destination = findEmptyFrame(SSD);
 	}
 	else if (location == SSD){
-		printf("   evicting from SSD and finding an empty space in HD\n");
+		//printf("   evicting from SSD and finding an empty space in HD\n");
 		destination = findEmptyFrame(HD);
 		}
 
 	// assign value of evicted page to empty space
 	if (location == RAM) {
-		printf("   Moving page from RAM into SSD\n");
+		//printf("   Moving page from RAM into SSD\n");
 		SSDArray[destination] = RAMArray[evictIndex];
 		// remove value from location in memory
 		RAMArray[evictIndex] = -1;
@@ -215,9 +220,8 @@ int evictPageFrom(MemoryLocation location)
 		pageTable[pt_entry].SSDIndex = destination;
 		pageTable[pt_entry].location = SSD;
 	}
-
-	if (location == SSD) {
-		printf("   Moving page from SSD into HD\n");
+	else if (location == SSD) {
+		//printf("   Moving page from SSD into HD\n");
 		HDArray[destination] = SSDArray[evictIndex];
 		// remove value from location in memory
 		SSDArray[evictIndex] = -1;
@@ -227,7 +231,7 @@ int evictPageFrom(MemoryLocation location)
 		pageTable[pt_entry].location = HD;
 	}
 
-	printf("   returning final value of %d\n", evictIndex);
+	//printf("   returning final value of %d\n", evictIndex);
 	return evictIndex;
 
 }
@@ -385,12 +389,12 @@ int *accessIntPtr(vAddr address)
 
 	if(!structOfInterest->isAllocated){
 		errorWithContext("You tried to access a value which has not been previously allocated");
-		exit(0);
+		exit(1);
 	}
 
-	printf("Checking where the page is stored\n");
+	//printf("Checking where the page is stored\n");
 	//if the page is already in RAM, return a pointer to the necessary memory in RAM
-	if(structOfInterest->location == RAM)
+	if(structOfInterest->RAMIndex != -1)
 	{
 		printf("Page is in RAM\n");
 		structOfInterest->isDirty = 1;
@@ -398,9 +402,12 @@ int *accessIntPtr(vAddr address)
 		return &RAMArray[structOfInterest->RAMIndex];
 	}
 	//if the page is not in RAM but is currently in SSD, evict a page from SSD
-	else if(structOfInterest->location == SSD)
+	else if(structOfInterest->SSDIndex != -1)
 	{
-		printf("page is in SSD\n");
+		printf("delay .25 sec\n");
+		usleep(250000);
+		int memVal = SSDArray[structOfInterest->SSDIndex];
+		//printf("page is in SSD\n");
 		int newlyOpenedIndexInRAM = evictPageFrom(RAM);
 
 		if(newlyOpenedIndexInRAM == -1){
@@ -409,7 +416,7 @@ int *accessIntPtr(vAddr address)
 			return NULL;
 		}
 
-		RAMArray[newlyOpenedIndexInRAM] = 0;
+		RAMArray[newlyOpenedIndexInRAM] = memVal;
 
 		structOfInterest->RAMIndex = newlyOpenedIndexInRAM;
 		structOfInterest->isDirty = 1;
@@ -419,14 +426,16 @@ int *accessIntPtr(vAddr address)
 
 	}
 	//page is in HD. evict page from SSD and then from RAM
-	else if(structOfInterest->location == HD)
+	else if(structOfInterest->HDIndex != -1)
 	{
-		printf("Page is in HD\n");
+		printf("delay 2.5 sec\n");
+		usleep(2500000);
+		//printf("Page is in HD\n");
 		int memVal = HDArray[structOfInterest->HDIndex];
 		int newlyOpenedIndexInRAM;
 		int newlyOpenedIndexInSSD;
 
-		printf("Data stored in HDArray[%d] is %d \n", structOfInterest->HDIndex, memVal);
+		//printf("Data stored in HDArray[%d] is %d \n", structOfInterest->HDIndex, memVal);
 
 		newlyOpenedIndexInSSD = evictPageFrom(SSD);
 
@@ -438,12 +447,12 @@ int *accessIntPtr(vAddr address)
 		structOfInterest->SSDIndex = newlyOpenedIndexInSSD;
 		SSDArray[newlyOpenedIndexInSSD] = memVal;
 
-		printf("Changes SSDArray [%d] to %d\n", newlyOpenedIndexInSSD, memVal);
+		//printf("Changes SSDArray [%d] to %d\n", newlyOpenedIndexInSSD, memVal);
 
-		printf("about to evict page from RAM\n");
+		//printf("about to evict page from RAM\n");
 		newlyOpenedIndexInRAM = evictPageFrom(RAM);
 
-		printf("Successfully evicted a page from RAM\n");
+		//printf("Successfully evicted a page from RAM\n");
 
 		if(newlyOpenedIndexInRAM == -1){
 //			printPageTableData();
@@ -453,15 +462,15 @@ int *accessIntPtr(vAddr address)
 
 		RAMArray[newlyOpenedIndexInRAM] = memVal;
 
-		printf("Changes RAMArray[%d] to %d\n", newlyOpenedIndexInRAM, memVal);
+		//printf("Changes RAMArray[%d] to %d\n", newlyOpenedIndexInRAM, memVal);
 
-		printf("Saved value in RAM to be %d\n", memVal);
+		//printf("Saved value in RAM to be %d\n", memVal);
 
 		structOfInterest->RAMIndex = newlyOpenedIndexInRAM;
 		structOfInterest->isDirty = 1;
 		structOfInterest->isLocked = 1;
 
-		printf("Returning ptr to RAM\n");
+		//printf("Returning ptr to RAM\n");
 		return &RAMArray[structOfInterest->RAMIndex];
 	}
 
